@@ -78,9 +78,12 @@ jobs:
         run: pnpm build
 
       - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
         env:
           CLOUDFLARE_API_KEY: ${{ secrets.CF_GLOBAL_API_KEY }}
           CLOUDFLARE_EMAIL: ${{ secrets.CF_EMAIL }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        run: |
-          pnpm wrangler pages deploy dist --project-name=subserver-chat --branch=main
+        with:
+          command: pages deploy dist --project-name=subserver-chat --branch=main
+          workingDirectory: frontend
+          wranglerVersion: "3"

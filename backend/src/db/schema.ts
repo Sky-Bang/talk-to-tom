@@ -28,11 +28,11 @@ export const contacts = sqliteTable("contacts", {
   aktif: integer("aktif", { mode: "boolean" }).default(true),
   dibuat_pada: integer("dibuat_pada", { mode: "timestamp" }).$defaultFn(() => new Date()),
   dihapus_pada: integer("dihapus_pada", { mode: "timestamp" }),
-}, (table) => [
-  index("idx_contacts_subserver").on(table.subserver_id),
-  index("idx_contacts_aktif").on(table.aktif),
-  index("idx_contacts_kode_sub").on(table.kode_anggota, table.subserver_id),
-]);
+}, (table) => ({
+  idxContactsSubserver: index("idx_contacts_subserver").on(table.subserver_id),
+  idxContactsAktif: index("idx_contacts_aktif").on(table.aktif),
+  idxContactsKodeSub: index("idx_contacts_kode_sub").on(table.kode_anggota, table.subserver_id),
+}));
 
 // ============================================================
 // GROUP MESSAGES
@@ -51,10 +51,10 @@ export const groupMessages = sqliteTable("group_messages", {
   balas_ke: integer("balas_ke"), // id pesan yang dibalas
   deleted: integer("deleted", { mode: "boolean" }).default(false),
   dibuat_pada: integer("dibuat_pada", { mode: "timestamp" }).$defaultFn(() => new Date()),
-}, (table) => [
-  index("idx_gm_subserver_time").on(table.subserver_id, table.dibuat_pada),
-  index("idx_gm_pengirim").on(table.pengirim),
-]);
+}, (table) => ({
+  idxGmSubserverTime: index("idx_gm_subserver_time").on(table.subserver_id, table.dibuat_pada),
+  idxGmPengirim: index("idx_gm_pengirim").on(table.pengirim),
+}));
 
 // ============================================================
 // PERSONAL MESSAGES
@@ -74,12 +74,12 @@ export const personalMessages = sqliteTable("personal_messages", {
   balas_ke: integer("balas_ke"),
   deleted: integer("deleted", { mode: "boolean" }).default(false),
   dibuat_pada: integer("dibuat_pada", { mode: "timestamp" }).$defaultFn(() => new Date()),
-}, (table) => [
-  index("idx_pm_subserver_time").on(table.subserver_id, table.dibuat_pada),
-  index("idx_pm_pengirim").on(table.pengirim),
-  index("idx_pm_penerima").on(table.penerima),
-  index("idx_pm_conversation").on(table.pengirim, table.penerima),
-]);
+}, (table) => ({
+  idxPmSubserverTime: index("idx_pm_subserver_time").on(table.subserver_id, table.dibuat_pada),
+  idxPmPengirim: index("idx_pm_pengirim").on(table.pengirim),
+  idxPmPenerima: index("idx_pm_penerima").on(table.penerima),
+  idxPmConversation: index("idx_pm_conversation").on(table.pengirim, table.penerima),
+}));
 
 // ============================================================
 // PERSONAL CHAT ROOMS
@@ -93,11 +93,11 @@ export const personalChatRooms = sqliteTable("personal_chat_rooms", {
   preview_pesan_terakhir: text("preview_pesan_terakhir"),
   belum_dibaca_a: integer("belum_dibaca_a").default(0),
   belum_dibaca_b: integer("belum_dibaca_b").default(0),
-}, (table) => [
-  index("idx_pcr_subserver").on(table.subserver_id),
-  index("idx_pcr_peserta_a").on(table.peserta_a),
-  index("idx_pcr_peserta_b").on(table.peserta_b),
-]);
+}, (table) => ({
+  idxPcrSubserver: index("idx_pcr_subserver").on(table.subserver_id),
+  idxPcrPesertaA: index("idx_pcr_peserta_a").on(table.peserta_a),
+  idxPcrPesertaB: index("idx_pcr_peserta_b").on(table.peserta_b),
+}));
 
 // ============================================================
 // TYPING INDICATORS (in-memory only, stored briefly in KV)
@@ -115,7 +115,7 @@ export const auditLog = sqliteTable("audit_log", {
   detail: text("detail"),
   ip: text("ip"),
   dibuat_pada: integer("dibuat_pada", { mode: "timestamp" }).$defaultFn(() => new Date()),
-}, (table) => [
-  index("idx_audit_subserver").on(table.subserver_id),
-  index("idx_audit_aktor").on(table.aktor),
-]);
+}, (table) => ({
+  idxAuditSubserver: index("idx_audit_subserver").on(table.subserver_id),
+  idxAuditAktor: index("idx_audit_aktor").on(table.aktor),
+}));
