@@ -36,7 +36,7 @@ auth.post("/validasi", async (c) => {
       c.env.JWT_SECRET
     );
     setCookie(c, "auth_token", token, {
-      httpOnly: true, secure: true, sameSite: "Strict",
+      httpOnly: true, secure: true, sameSite: "None",
       maxAge: 24 * 60 * 60, path: "/",
     });
     return c.json({ success: true, role: "admin", name: "Admin", redirect: "/admin/dashboard" });
@@ -65,7 +65,7 @@ auth.post("/validasi", async (c) => {
       c.env.JWT_SECRET
     );
     setCookie(c, "auth_token", token, {
-      httpOnly: true, secure: true, sameSite: "Strict",
+      httpOnly: true, secure: true, sameSite: "None",
       maxAge: 24 * 60 * 60, path: "/",
     });
     return c.json({
@@ -128,7 +128,7 @@ auth.post("/validasi", async (c) => {
     c.env.JWT_SECRET
   );
   setCookie(c, "auth_token", token, {
-    httpOnly: true, secure: true, sameSite: "Strict",
+    httpOnly: true, secure: true, sameSite: "None",
     maxAge: 24 * 60 * 60, path: "/",
   });
   return c.json({
@@ -171,7 +171,7 @@ auth.post("/refresh", async (c) => {
       c.env.JWT_SECRET
     );
     setCookie(c, "auth_token", newToken, {
-      httpOnly: true, secure: true, sameSite: "Strict",
+      httpOnly: true, secure: true, sameSite: "None",
       maxAge: 24 * 60 * 60, path: "/",
     });
     return c.json({ success: true });
