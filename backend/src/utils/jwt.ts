@@ -19,7 +19,6 @@ function base64url(buf: ArrayBuffer): string {
 }
 
 function encodeBase64url(obj: unknown): string {
-  // UTF-8-safe encode to handle non-ASCII characters (e.g., names)
   const json = JSON.stringify(obj);
   const bytes = new TextEncoder().encode(json);
   let binary = "";
@@ -31,7 +30,6 @@ function encodeBase64url(obj: unknown): string {
 }
 
 function decodeBase64url(str: string): string {
-  // Add padding back
   const padded = str.replace(/-/g, "+").replace(/_/g, "/");
   const pad = padded.length % 4;
   const b64 = pad ? padded + "=".repeat(4 - pad) : padded;
@@ -41,13 +39,26 @@ function decodeBase64url(str: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+// Decode base64url langsung ke Uint8Array tanpa melalui TextDecoder.
+// Digunakan untuk raw binary data seperti signature HMAC — TextDecoder
+// merusak bytes >= 0x80 karena menginterpretasinya sebagai UTF-8.
+function decodeBase64urlToBytes(str: string): Uint8Array {
+  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = padded.length % 4;
+  const b64 = pad ? padded + "=".repeat(4 - pad) : padded;
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
 export async function signJWT(payload: Omit<JWTPayload, "iat" | "exp">, secret: string): Promise<string> {
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
   const fullPayload: JWTPayload = {
     ...payload,
     iat: now,
-    exp: now + 24 * 60 * 60, // 24 jam
+    exp: now + 24 * 60 * 60,
   };
 
   const enc = new TextEncoder();
@@ -71,10 +82,8 @@ export async function verifyJWT(token: string, secret: string): Promise<JWTPaylo
   const key = await getKey(secret);
   const enc = new TextEncoder();
 
-  // Decode signature
-  const sigStr = decodeBase64url(sigB64);
-  const sigBuf = new Uint8Array(sigStr.length);
-  for (let i = 0; i < sigStr.length; i++) sigBuf[i] = sigStr.charCodeAt(i);
+  // Decode signature ke raw bytes (bukan UTF-8 string) agar tidak rusak
+  const sigBuf = decodeBase64urlToBytes(sigB64);
 
   const valid = await crypto.subtle.verify("HMAC", key, sigBuf, enc.encode(signingInput));
   if (!valid) throw new Error("Invalid signature");
