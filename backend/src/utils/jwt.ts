@@ -18,8 +18,27 @@ function base64url(buf: ArrayBuffer): string {
     .replace(/=/g, "");
 }
 
+function encodeBase64url(obj: unknown): string {
+  // UTF-8-safe encode to handle non-ASCII characters (e.g., names)
+  const json = JSON.stringify(obj);
+  const bytes = new TextEncoder().encode(json);
+  let binary = "";
+  bytes.forEach((b) => (binary += String.fromCharCode(b)));
+  return btoa(binary)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=/g, "");
+}
+
 function decodeBase64url(str: string): string {
-  return atob(str.replace(/-/g, "+").replace(/_/g, "/"));
+  // Add padding back
+  const padded = str.replace(/-/g, "+").replace(/_/g, "/");
+  const pad = padded.length % 4;
+  const b64 = pad ? padded + "=".repeat(4 - pad) : padded;
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new TextDecoder().decode(bytes);
 }
 
 export async function signJWT(payload: Omit<JWTPayload, "iat" | "exp">, secret: string): Promise<string> {
@@ -32,8 +51,8 @@ export async function signJWT(payload: Omit<JWTPayload, "iat" | "exp">, secret: 
   };
 
   const enc = new TextEncoder();
-  const headerB64 = btoa(JSON.stringify(header)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
-  const payloadB64 = btoa(JSON.stringify(fullPayload)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=/g, "");
+  const headerB64 = encodeBase64url(header);
+  const payloadB64 = encodeBase64url(fullPayload);
   const signingInput = `${headerB64}.${payloadB64}`;
 
   const key = await getKey(secret);

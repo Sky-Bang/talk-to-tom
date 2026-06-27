@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuthStore } from "./stores/authStore";
 import { authApi } from "./api/auth";
 
@@ -35,14 +35,28 @@ function SubServerRoute({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  const { setAuth, clearAuth } = useAuthStore();
+  const { setAuth, clearAuth, isAuthenticated } = useAuthStore();
+  const [sessionChecked, setSessionChecked] = useState(false);
 
-  // Verifikasi session saat mount
+  // Verifikasi session saat mount — tunggu hasilnya sebelum render routes
   useEffect(() => {
     authApi.sesi()
       .then((res) => { if (res.authenticated && res.payload) setAuth(res.payload); else clearAuth(); })
-      .catch(clearAuth);
+      .catch(clearAuth)
+      .finally(() => setSessionChecked(true));
   }, [setAuth, clearAuth]);
+
+  // Tampilkan loading screen sampai session check selesai
+  if (!sessionChecked) {
+    return (
+      <div className="h-dvh flex items-center justify-center bg-bg-primary">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+          <p className="text-xs text-text-secondary">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <Routes>

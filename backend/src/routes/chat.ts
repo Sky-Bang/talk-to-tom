@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import { eq, and, or, desc, gt, asc } from "drizzle-orm";
+import { eq, and, or, desc, gt, lt, asc } from "drizzle-orm";
 import { getDb } from "../db/connection";
 import {
   groupMessages,
@@ -16,23 +16,24 @@ const chat = new Hono<{ Bindings: Env; Variables: { jwtPayload: JWTPayload } }>(
 chat.get("/grup/riwayat", async (c) => {
   const payload = c.get("jwtPayload");
   const db = getDb(c.env);
-  const before = c.req.query("before"); // cursor-based pagination
+  // "before" = fetch messages older than this id (cursor-based, load older messages)
+  const before = c.req.query("before");
   const limit = Math.min(parseInt(c.req.query("limit") || "50"), 100);
 
-  let query = db
+  const messages = await db
     .select()
     .from(groupMessages)
     .where(
       and(
         eq(groupMessages.subserver_id, payload.subserver_id),
         eq(groupMessages.deleted, false),
-        ...(before ? [gt(groupMessages.dibuat_pada, new Date(before))] : [])
+        ...(before ? [lt(groupMessages.id, parseInt(before))] : [])
       )
     )
-    .orderBy(desc(groupMessages.dibuat_pada))
+    .orderBy(desc(groupMessages.id))
     .limit(limit);
 
-  const messages = await query;
+  // Return in chronological order
   return c.json({ messages: messages.reverse(), has_more: messages.length === limit });
 });
 
@@ -305,7 +306,8 @@ chat.post("/dibaca", async (c) => {
       .where(
         and(
           eq(personalMessages.id, id_pesan),
-          eq(personalMessages.penerima, payload.sub)
+          eq(personalMessages.penerima, payload.sub),
+          eq(personalMessages.subserver_id, payload.subserver_id) // prevent IDOR
         )
       );
   }
@@ -356,7 +358,12 @@ chat.post("/hapus", async (c) => {
     const [msg] = await db
       .select({ pengirim: groupMessages.pengirim })
       .from(groupMessages)
-      .where(eq(groupMessages.id, id_pesan))
+      .where(
+        and(
+          eq(groupMessages.id, id_pesan),
+          eq(groupMessages.subserver_id, payload.subserver_id) // prevent IDOR
+        )
+      )
       .limit(1);
 
     if (!msg) return c.json({ error: "Pesan tidak ditemukan" }, 404);
@@ -367,7 +374,12 @@ chat.post("/hapus", async (c) => {
     await db
       .update(groupMessages)
       .set({ deleted: true, isi: "Pesan telah dihapus" })
-      .where(eq(groupMessages.id, id_pesan));
+      .where(
+        and(
+          eq(groupMessages.id, id_pesan),
+          eq(groupMessages.subserver_id, payload.subserver_id)
+        )
+      );
   }
 
   return c.json({ success: true });

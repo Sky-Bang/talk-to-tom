@@ -30,7 +30,7 @@ auth.post("/validasi", async (c) => {
   const db = getDb(c.env);
 
   // ── ADMIN ────────────────────────────────────────────
-  if (kode === c.env.ADMIN_CODE || kode === "88#") {
+  if (c.env.ADMIN_CODE && kode === c.env.ADMIN_CODE) {
     const token = await signJWT(
       { sub: "admin", role: "admin", subserver_id: "pusat", name: "Admin" },
       c.env.JWT_SECRET

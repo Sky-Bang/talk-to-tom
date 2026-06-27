@@ -14,7 +14,9 @@ export function useGroupChat() {
       setMessages(res.messages);
       if (res.messages.length > 0) {
         const last = res.messages[res.messages.length - 1];
-        lastTimestamp.current = String(last.dibuat_pada);
+        // Use ISO string from server to avoid client/server clock skew
+        const ts = last.dibuat_pada;
+        lastTimestamp.current = typeof ts === "string" ? ts : new Date(Number(ts) * 1000).toISOString();
       }
     } finally {
       setLoading(false);
@@ -29,7 +31,8 @@ export function useGroupChat() {
         const newMsgs = res.data.filter((m) => !existingIds.has(m.id));
         return [...prev, ...newMsgs];
       });
-      lastTimestamp.current = res.last_timestamp;
+      // Always update cursor from server response (server authoritative)
+      if (res.last_timestamp) lastTimestamp.current = res.last_timestamp;
     }
   }, []);
 
@@ -62,7 +65,8 @@ export function useDMChat(penerima: string) {
       setMessages(res.messages);
       if (res.messages.length > 0) {
         const last = res.messages[res.messages.length - 1];
-        lastTimestamp.current = String(last.dibuat_pada);
+        const ts = last.dibuat_pada;
+        lastTimestamp.current = typeof ts === "string" ? ts : new Date(Number(ts) * 1000).toISOString();
       }
     } finally {
       setLoading(false);
@@ -77,7 +81,7 @@ export function useDMChat(penerima: string) {
         const newMsgs = res.data.filter((m) => !existingIds.has(m.id));
         return [...prev, ...newMsgs];
       });
-      lastTimestamp.current = res.last_timestamp;
+      if (res.last_timestamp) lastTimestamp.current = res.last_timestamp;
     }
   }, [penerima]);
 
