@@ -2,12 +2,13 @@ name = "subserver-chat-api"
 main = "src/index.ts"
 compatibility_date = "2024-06-27"
 compatibility_flags = ["nodejs_compat"]
+workers_dev = true
 
 # D1 Database
 [[d1_databases]]
 binding = "DB"
 database_name = "subserver-db"
-database_id = "REPLACE_WITH_YOUR_D1_ID"
+database_id = "3c614b3d-c4af-4ad6-a066-97539ccee9cc"
 migrations_dir = "src/db/migrations"
 
 # R2 Bucket
@@ -18,7 +19,7 @@ bucket_name = "subserver-media"
 # KV Namespace
 [[kv_namespaces]]
 binding = "RATE_LIMIT_KV"
-id = "REPLACE_WITH_YOUR_KV_ID"
+id = "a07a6f16dc474170934e1c6174b06ed7"
 
 # Cron Trigger (auto-delete jam 2 pagi)
 [triggers]

@@ -1,0 +1,19 @@
+{
+  "name": "SubServer Chat",
+  "short_name": "SubServer",
+  "description": "Aplikasi chat private berbasis SubServer — 100% private, tanpa nomor telepon.",
+  "start_url": "/",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#0A0A0F",
+  "theme_color": "#0A0A0F",
+  "categories": ["social", "communication"],
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
