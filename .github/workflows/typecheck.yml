@@ -1,0 +1,32 @@
+name: Typecheck & Lint
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  typecheck:
+    name: TypeScript Typecheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Install all deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck frontend
+        working-directory: frontend
+        run: pnpm typecheck
+
+      - name: Typecheck backend
+        working-directory: backend
+        run: pnpm typecheck

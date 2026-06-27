@@ -1,0 +1,41 @@
+name = "subserver-chat-api"
+main = "src/index.ts"
+compatibility_date = "2024-06-27"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "subserver-db"
+database_id = "REPLACE_WITH_YOUR_D1_ID"
+migrations_dir = "src/db/migrations"
+
+# R2 Bucket
+[[r2_buckets]]
+binding = "MEDIA_BUCKET"
+bucket_name = "subserver-media"
+
+# KV Namespace
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "REPLACE_WITH_YOUR_KV_ID"
+
+# Cron Trigger (auto-delete jam 2 pagi)
+[triggers]
+crons = ["0 2 * * *"]
+
+# Environment Variables
+[vars]
+APP_NAME = "SubServer Chat"
+MAX_CONTACTS_DEFAULT = "50"
+POLLING_INTERVAL = "3000"
+FRONTEND_URL = "https://subserver-chat.pages.dev"
+
+# Secrets (set via CLI):
+# wrangler secret put JWT_SECRET
+# wrangler secret put ADMIN_CODE   (value: 88#)
+# wrangler secret put R2_ACCESS_KEY_ID
+# wrangler secret put R2_SECRET_ACCESS_KEY
+# wrangler secret put R2_ACCOUNT_ID
+# wrangler secret put R2_BUCKET_NAME
+# wrangler secret put R2_PUBLIC_URL

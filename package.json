@@ -1,0 +1,17 @@
+{
+  "name": "subserver-chat",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "build:frontend": "pnpm --filter frontend build",
+    "build:backend": "pnpm --filter backend build",
+    "deploy:backend": "pnpm --filter backend deploy",
+    "typecheck": "pnpm -r --if-present run typecheck",
+    "lint": "pnpm -r --if-present run lint"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
+  }
+}
