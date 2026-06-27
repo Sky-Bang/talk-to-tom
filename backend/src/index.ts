@@ -39,12 +39,18 @@ const authMiddleware = async (c: any, next: any) => {
 };
 
 const adminMiddleware = async (c: any, next: any) => {
-  await authMiddleware(c, async () => {});
-  const payload = c.get("jwtPayload");
-  if (!payload || payload.role !== "admin") {
-    return c.json({ error: "Hanya Admin yang bisa mengakses ini" }, 403);
+  const token = getCookie(c, "auth_token");
+  if (!token) return c.json({ error: "Unauthorized" }, 401);
+  try {
+    const payload = await verifyJWT(token, c.env.JWT_SECRET);
+    if (payload.role !== "admin") {
+      return c.json({ error: "Hanya Admin yang bisa mengakses ini" }, 403);
+    }
+    c.set("jwtPayload", payload);
+    await next();
+  } catch {
+    return c.json({ error: "Token tidak valid atau expired" }, 401);
   }
-  await next();
 };
 
 // ── PUBLIC ROUTES ─────────────────────────────────────────────
